@@ -1,0 +1,3 @@
+include:
+  - local: '/gitlab/terraform.yml'
+  - local: '/gitlab/sonarcloud.yml'
