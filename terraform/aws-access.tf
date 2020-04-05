@@ -6,12 +6,10 @@ resource "aws_iam_user" "deploy_aws_access" {
   path = "/deployment/"
   tags = var.default_tags
 }
-module "tfstate_aws_access" {
-  source = "../modules/policy-remotestate"
+module "remote_state_aws_access" {
+  source = "./modules/remote-backend"
   user   = aws_iam_user.deploy_aws_access.id
-  object = "aws-access.tfstate"
-  table  = aws_dynamodb_table.terraform_lock.arn
-  bucket = aws_s3_bucket.terraform_state.arn
+  role   = "arn:aws:iam::939514526661:role/remotestate/aws-access"
 }
 
 /*
@@ -19,7 +17,7 @@ module "tfstate_aws_access" {
  */
 resource "aws_iam_role" "deploy_aws_access" {
   name               = "deploy-aws-access"
-  description        = "Deployment role for 'AWS Access' service"
+  description        = "Deployment role for 'aws-access' service"
   assume_role_policy = data.aws_iam_policy_document.aws_access_assume_role.json
 }
 data "aws_iam_policy_document" "aws_access_assume_role" {
@@ -36,14 +34,6 @@ data "aws_iam_policy_document" "aws_access_assume_role" {
 /*
  * AWS Policies
  */
-resource "aws_iam_role_policy_attachment" "aws_access_ses" {
-  role       = aws_iam_role.deploy_aws_access.id
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSESFullAccess"
-}
-resource "aws_iam_role_policy_attachment" "aws_access_cognito" {
-  role       = aws_iam_role.deploy_aws_access.id
-  policy_arn = "arn:aws:iam::aws:policy/AmazonCognitoPowerUser"
-}
 
 /*
  * IAM Policy
