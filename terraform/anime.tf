@@ -35,7 +35,7 @@ data "aws_iam_policy_document" "anime_assume_role" {
  * Modules
  */
 module "anime_dynamodb" {
-  source  = "./modules/remote-backend"
+  source  = "./modules/dynamodb"
   service = "anime"
   role    = aws_iam_role.deploy_anime.id
   account = lookup(var.aws_accounts, local.environment)
