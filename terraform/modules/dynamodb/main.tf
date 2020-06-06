@@ -7,9 +7,6 @@ resource "aws_iam_role_policy" "policy" {
 data "aws_iam_policy_document" "document" {
   statement {
     sid = "Table"
-    actions = [
-      "dynamodb:*"
-    ]
     not_actions = [
       "dynamodb:DeleteBackup",
       "dynamodb:RestoreTableFromBackup",
