@@ -10,6 +10,13 @@ variable "environments" {
   }
 }
 
+variable "aws_accounts" {
+  type = map(string)
+  default = {
+    dev = "949257948165"
+  }
+}
+
 variable "default_tags" {
   type        = map(string)
   description = "Common resource tags for all resources"
