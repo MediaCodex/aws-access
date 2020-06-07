@@ -33,8 +33,59 @@ data "aws_iam_policy_document" "core_assume_role" {
 
 /*
  * AWS Policies
+ * TODO: limit to specific resources or prefixes
  */
+resource "aws_iam_role_policy_attachment" "core_gateway" {
+  role       = aws_iam_role.deploy_core.id
+  policy_arn = "arn:aws:iam::aws:policy/AmazonAPIGatewayAdministrator"
+}
+resource "aws_iam_role_policy_attachment" "core_ses" {
+  role       = aws_iam_role.deploy_core.id
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSESFullAccess"
+}
 
 /*
  * IAM Policy
  */
+resource "aws_iam_role_policy" "core_cognito" {
+  name   = "Cognito"
+  role   = aws_iam_role.deploy_core.id
+  policy = data.aws_iam_policy_document.core_cognito.json
+}
+data "aws_iam_policy_document" "core_cognito" {
+  statement {
+    sid = "UserPool"
+    actions = [
+      "cognito-idp:TagResource",
+      "cognito-idp:DeleteGroup",
+      "cognito-idp:UpdateUserPoolDomain",
+      "cognito-idp:DeleteUserPool",
+      "cognito-idp:CreateGroup",
+      "cognito-idp:DeleteUserPoolClient",
+      "cognito-idp:UpdateUserPoolClient",
+      "cognito-idp:ListTagsForResource",
+      "cognito-idp:GetUserPoolMfaConfig",
+      "cognito-idp:DeleteUserPoolDomain",
+      "cognito-idp:ListUserPoolClients",
+      "cognito-idp:DescribeUserPool",
+      "cognito-idp:CreateUserPoolDomain",
+      "cognito-idp:UntagResource",
+      "cognito-idp:CreateUserPoolClient",
+      "cognito-idp:UpdateGroup",
+      "cognito-idp:SetUserPoolMfaConfig",
+      "cognito-idp:UpdateUserPool",
+      "cognito-idp:DescribeUserPoolClient"
+    ]
+    resources = ["arn:aws:cognito-idp:*:*:userpool/*"]
+  }
+
+  statement {
+    sid = "Global"
+    actions = [
+      "cognito-idp:DescribeUserPoolDomain",
+      "cognito-idp:CreateUserPool",
+      "cognito-idp:ListUserPools"
+    ]
+    resources = ["*"]
+  }
+}
