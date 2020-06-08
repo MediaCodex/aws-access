@@ -62,6 +62,51 @@ data "aws_iam_policy_document" "website_cognito" {
 }
 
 /*
+ * IAM Policy (deploy)
+ */
+resource "aws_iam_user_policy" "website_objects" {
+  name   = "StaticWebHosting"
+  user   = aws_iam_user.deploy_website.id
+  policy = data.aws_iam_policy_document.website_objects.json
+}
+data "aws_iam_policy_document" "website_objects" {
+  statement {
+    sid = "Object"
+    actions = [
+      "s3:DeleteObjectTagging",
+      "s3:DeleteObjectVersion",
+      "s3:GetObjectVersionTagging",
+      "s3:RestoreObject",
+      "s3:PutObjectVersionTagging",
+      "s3:DeleteObjectVersionTagging",
+      "s3:ListMultipartUploadParts",
+      "s3:PutObject",
+      "s3:GetObjectAcl",
+      "s3:GetObject",
+      "s3:AbortMultipartUpload",
+      "s3:GetObjectVersionAcl",
+      "s3:GetObjectTagging",
+      "s3:PutObjectTagging",
+      "s3:DeleteObject",
+      "s3:GetObjectVersion"
+    ]
+    resources = [
+      "arn:aws:s3:::${replace(local.domain, ".", "-")}/*"
+    ]
+  }
+  statement {
+    sid = "Bucket"
+    actions = [
+      "s3:ListBucketMultipartUploads",
+      "s3:ListBucketVersions"
+    ]
+    resources = [
+      "arn:aws:s3:::${replace(local.domain, ".", "-")}"
+    ]
+  }
+}
+
+/*
  * IAM Policy (Static)
  */
 resource "aws_iam_role_policy" "website_static" {
