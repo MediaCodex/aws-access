@@ -91,7 +91,7 @@ data "aws_iam_policy_document" "website_objects" {
       "s3:GetObjectVersion"
     ]
     resources = [
-      "arn:aws:s3:::${replace(local.domain, ".", "-")}/*"
+      "arn:aws:s3:::mediacodex-${local.environment}-website/*"
     ]
   }
   statement {
@@ -101,7 +101,7 @@ data "aws_iam_policy_document" "website_objects" {
       "s3:ListBucketVersions"
     ]
     resources = [
-      "arn:aws:s3:::${replace(local.domain, ".", "-")}"
+      "arn:aws:s3:::mediacodex-${local.environment}-website"
     ]
   }
 }
@@ -161,8 +161,8 @@ data "aws_iam_policy_document" "website_static" {
       "s3:GetObjectVersion"
     ]
     resources = [
-      "arn:aws:s3:::${replace(local.domain, ".", "-")}",
-      "arn:aws:s3:::${replace(local.domain, ".", "-")}/*"
+      "arn:aws:s3:::mediacodex-${local.environment}-website",
+      "arn:aws:s3:::mediacodex-${local.environment}-website/*"
     ]
   }
   statement {
