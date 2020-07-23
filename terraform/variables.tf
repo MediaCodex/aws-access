@@ -41,3 +41,9 @@ variable "terraform_state" {
     dynamo = "arn:aws:dynamodb:eu-central-1:939514526661:table/terraform-state-lock"
   }
 }
+
+variable "first_deploy" {
+  type        = bool
+  description = "Disables some resources that depend on other services being deployed"
+  default     = false
+}

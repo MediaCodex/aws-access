@@ -36,32 +36,6 @@ data "aws_iam_policy_document" "website_assume_role" {
  */
 
 /*
- * IAM Policy (Cognito)
- */
-resource "aws_iam_role_policy" "website_cognito" {
-  name   = "Cognito"
-  role   = aws_iam_role.deploy_website.id
-  policy = data.aws_iam_policy_document.website_cognito.json
-}
-data "aws_iam_policy_document" "website_cognito" {
-  statement {
-    actions = [
-      "cognito-idp:TagResource",
-      "cognito-idp:UntagResource",
-      "cognito-idp:CreateUserPoolClient",
-      "cognito-idp:DeleteUserPoolClient",
-      "cognito-idp:UpdateUserPoolClient",
-      "cognito-idp:ListUserPoolClients",
-      "cognito-idp:DescribeUserPoolClient"
-    ]
-    resources = [
-      // TODO: figure out how to lock this down more
-      "arn:aws:cognito-idp:eu-central-1:949257948165:userpool/*"
-    ]
-  }
-}
-
-/*
  * IAM Policy (deploy)
  */
 resource "aws_iam_user_policy" "website_objects" {
@@ -94,6 +68,7 @@ data "aws_iam_policy_document" "website_objects" {
       "arn:aws:s3:::${local.domain}/*"
     ]
   }
+
   statement {
     sid = "Bucket"
     actions = [
@@ -103,6 +78,19 @@ data "aws_iam_policy_document" "website_objects" {
     resources = [
       "arn:aws:s3:::${local.domain}"
     ]
+  }
+
+  dynamic "statement" {
+    for_each = var.first_deploy ? [] : ["cloudfront"]
+    content {
+      sid = "Cloudfront"
+      actions = [
+        "cloudfront:CreateInvalidation"
+      ]
+      resources = [
+        data.terraform_remote_state.website.outputs.cloudfront_arn
+      ]
+    }
   }
 }
 
