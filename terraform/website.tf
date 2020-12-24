@@ -1,3 +1,5 @@
+
+
 /**
  * Deployment User
  */
@@ -23,6 +25,7 @@ resource "aws_iam_role" "deploy_website" {
   description        = "Deployment role for main website"
   assume_role_policy = data.aws_iam_policy_document.website_assume_role.json
 }
+
 data "aws_iam_policy_document" "website_assume_role" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -37,6 +40,11 @@ data "aws_iam_policy_document" "website_assume_role" {
 /**
  * IAM Policy (deploy)
  */
+data "aws_ssm_parameter" "website_distribution_arn" {
+  count = var.first_deploy == true ? 0 : 1
+  name  = "/website/distribution-arn"
+}
+
 resource "aws_iam_user_policy" "website_objects" {
   name   = "StaticWebHosting"
   user   = aws_iam_user.deploy_website.id
@@ -88,7 +96,7 @@ data "aws_iam_policy_document" "website_objects" {
         "cloudfront:CreateInvalidation"
       ]
       resources = [
-        data.terraform_remote_state.website.outputs.cloudfront_arn
+        data.aws_ssm_parameter.website_distribution_arn.0.value
       ]
     }
   }
