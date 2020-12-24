@@ -1,4 +1,4 @@
-/*
+/**
  * Deployment User
  */
 resource "aws_iam_user" "deploy_search" {
@@ -6,13 +6,16 @@ resource "aws_iam_user" "deploy_search" {
   path = "/deployment/"
   tags = var.default_tags
 }
-module "search_remote_state" {
-  source = "./modules/remote-backend"
-  user   = aws_iam_user.deploy_search.id
-  role   = "arn:aws:iam::939514526661:role/remotestate/search"
+
+module "search_tf_backend" {
+  source       = "./modules/tf-backend"
+  user         = aws_iam_user.deploy_search.id
+  service      = "search"
+  state_bucket = local.backend_state_bucket
+  lock_table   = local.backend_lock_table
 }
 
-/*
+/**
  * Deployment Role
  */
 resource "aws_iam_role" "deploy_search" {
@@ -20,6 +23,7 @@ resource "aws_iam_role" "deploy_search" {
   description        = "Deployment role for 'search' service"
   assume_role_policy = data.aws_iam_policy_document.search_assume_role.json
 }
+
 data "aws_iam_policy_document" "search_assume_role" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -30,16 +34,4 @@ data "aws_iam_policy_document" "search_assume_role" {
     }
   }
 }
-
-/*
- * Modules
- */
-
-/*
- * AWS Policies
- */
-
-/*
- * IAM Policy
- */
 

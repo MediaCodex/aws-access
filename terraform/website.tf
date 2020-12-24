@@ -1,4 +1,4 @@
-/*
+/**
  * Deployment User
  */
 resource "aws_iam_user" "deploy_website" {
@@ -6,13 +6,16 @@ resource "aws_iam_user" "deploy_website" {
   path = "/deployment/"
   tags = var.default_tags
 }
-module "remote_state_website" {
-  source = "./modules/remote-backend"
-  user   = aws_iam_user.deploy_website.id
-  role   = "arn:aws:iam::939514526661:role/remotestate/website"
+
+module "website_tf_backend" {
+  source       = "./modules/tf-backend"
+  user         = aws_iam_user.deploy_website.id
+  service      = "website"
+  state_bucket = local.backend_state_bucket
+  lock_table   = local.backend_lock_table
 }
 
-/*
+/**
  * Deployment Role
  */
 resource "aws_iam_role" "deploy_website" {
@@ -31,11 +34,7 @@ data "aws_iam_policy_document" "website_assume_role" {
   }
 }
 
-/*
- * AWS Policies
- */
-
-/*
+/**
  * IAM Policy (deploy)
  */
 resource "aws_iam_user_policy" "website_objects" {
@@ -43,6 +42,7 @@ resource "aws_iam_user_policy" "website_objects" {
   user   = aws_iam_user.deploy_website.id
   policy = data.aws_iam_policy_document.website_objects.json
 }
+
 data "aws_iam_policy_document" "website_objects" {
   statement {
     sid = "Object"
@@ -94,14 +94,15 @@ data "aws_iam_policy_document" "website_objects" {
   }
 }
 
-/*
- * IAM Policy (Static)
+/**
+ * IAM Policy (static)
  */
 resource "aws_iam_role_policy" "website_static" {
   name   = "StaticWebHosting"
   role   = aws_iam_role.deploy_website.id
   policy = data.aws_iam_policy_document.website_static.json
 }
+
 data "aws_iam_policy_document" "website_static" {
   statement {
     sid = "Bucket"

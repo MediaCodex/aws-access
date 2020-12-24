@@ -1,4 +1,4 @@
-/*
+/**
  * Deployment User
  */
 resource "aws_iam_user" "deploy_aws_access" {
@@ -6,13 +6,16 @@ resource "aws_iam_user" "deploy_aws_access" {
   path = "/deployment/"
   tags = var.default_tags
 }
-module "remote_state_aws_access" {
-  source = "./modules/remote-backend"
-  user   = aws_iam_user.deploy_aws_access.id
-  role   = "arn:aws:iam::939514526661:role/remotestate/aws-access"
+
+module "aws_access_tf_backend" {
+  source       = "./modules/tf-backend"
+  user         = aws_iam_user.deploy_aws_access.id
+  service      = "aws-access"
+  state_bucket = local.backend_state_bucket
+  lock_table   = local.backend_lock_table
 }
 
-/*
+/**
  * Deployment Role
  */
 resource "aws_iam_role" "deploy_aws_access" {
@@ -20,6 +23,7 @@ resource "aws_iam_role" "deploy_aws_access" {
   description        = "Deployment role for 'aws-access' service"
   assume_role_policy = data.aws_iam_policy_document.aws_access_assume_role.json
 }
+
 data "aws_iam_policy_document" "aws_access_assume_role" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -31,11 +35,7 @@ data "aws_iam_policy_document" "aws_access_assume_role" {
   }
 }
 
-/*
- * AWS Policies
- */
-
-/*
+/**
  * IAM Policy
  */
 resource "aws_iam_role_policy" "aws_access_iam" {
@@ -43,6 +43,7 @@ resource "aws_iam_role_policy" "aws_access_iam" {
   role   = aws_iam_role.deploy_aws_access.id
   policy = data.aws_iam_policy_document.aws_access_iam.json
 }
+
 data "aws_iam_policy_document" "aws_access_iam" {
   statement {
     sid = "ModifyUsers"

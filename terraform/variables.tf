@@ -1,6 +1,9 @@
 locals {
   environment = "${lookup(var.environments, terraform.workspace, "dev")}"
   domain      = lookup(var.domains, local.environment)
+  
+  backend_state_bucket = "arn:aws:s3:::mediacodex-${local.environment}-terraform-state"
+  backend_lock_table   = "arn:aws:dynamodb:us-east-1:${lookup(var.aws_accounts, local.environment)}:table/${local.environment}-terraform-lock"
 }
 
 variable "environments" {

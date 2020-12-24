@@ -1,4 +1,4 @@
-/*
+/**
  * Deployment User
  */
 resource "aws_iam_user" "deploy_companies" {
@@ -6,13 +6,16 @@ resource "aws_iam_user" "deploy_companies" {
   path = "/deployment/"
   tags = var.default_tags
 }
-module "companies_remote_state" {
-  source = "./modules/remote-backend"
-  user   = aws_iam_user.deploy_companies.id
-  role   = "arn:aws:iam::939514526661:role/remotestate/companies"
+
+module "companies_tf_backend" {
+  source       = "./modules/tf-backend"
+  user         = aws_iam_user.deploy_companies.id
+  service      = "companies"
+  state_bucket = local.backend_state_bucket
+  lock_table   = local.backend_lock_table
 }
 
-/*
+/**
  * Deployment Role
  */
 resource "aws_iam_role" "deploy_companies" {
@@ -20,6 +23,7 @@ resource "aws_iam_role" "deploy_companies" {
   description        = "Deployment role for 'companies' service"
   assume_role_policy = data.aws_iam_policy_document.companies_assume_role.json
 }
+
 data "aws_iam_policy_document" "companies_assume_role" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -31,7 +35,7 @@ data "aws_iam_policy_document" "companies_assume_role" {
   }
 }
 
-/*
+/**
  * Modules
  */
 module "companies_dynamodb" {
@@ -41,11 +45,11 @@ module "companies_dynamodb" {
   account = lookup(var.aws_accounts, local.environment)
 }
 
-/*
+/**
  * AWS Policies
  */
 
-/*
+/**
  * IAM Policy
  */
 
