@@ -52,6 +52,14 @@ module "companies_ssm" {
   account = lookup(var.aws_accounts, local.environment)
 }
 
+module "companies_ecs" {
+  source  = "./modules/ecs-service"
+  service = "companies"
+  user    = aws_iam_user.deploy_companies.id
+  role    = aws_iam_role.deploy_companies.id
+  account = lookup(var.aws_accounts, local.environment)
+}
+
 /**
  * AWS Policies
  */
