@@ -45,3 +45,10 @@ module "people_dynamodb" {
   account = lookup(var.aws_accounts, local.environment)
 }
 
+module "people_ssm" {
+  source  = "./modules/ssm-params"
+  service = "people"
+  role    = aws_iam_role.deploy_people.id
+  account = lookup(var.aws_accounts, local.environment)
+}
+

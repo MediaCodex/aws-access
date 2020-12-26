@@ -36,6 +36,16 @@ data "aws_iam_policy_document" "core_assume_role" {
 }
 
 /**
+ * Modules
+ */
+module "core_ssm" {
+  source  = "./modules/ssm-params"
+  service = "core"
+  role    = aws_iam_role.deploy_core.id
+  account = lookup(var.aws_accounts, local.environment)
+}
+
+/**
  * AWS Policies
  * TODO: limit to specific resources or prefixes
  */

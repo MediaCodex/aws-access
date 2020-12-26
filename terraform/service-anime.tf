@@ -45,3 +45,10 @@ module "anime_dynamodb" {
   account = lookup(var.aws_accounts, local.environment)
 }
 
+module "anime_ssm" {
+  source  = "./modules/ssm-params"
+  service = "anime"
+  role    = aws_iam_role.deploy_anime.id
+  account = lookup(var.aws_accounts, local.environment)
+}
+

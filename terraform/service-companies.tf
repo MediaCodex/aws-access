@@ -45,6 +45,13 @@ module "companies_dynamodb" {
   account = lookup(var.aws_accounts, local.environment)
 }
 
+module "companies_ssm" {
+  source  = "./modules/ssm-params"
+  service = "companies"
+  role    = aws_iam_role.deploy_companies.id
+  account = lookup(var.aws_accounts, local.environment)
+}
+
 /**
  * AWS Policies
  */
